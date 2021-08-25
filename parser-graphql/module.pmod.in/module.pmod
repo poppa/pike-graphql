@@ -118,3 +118,64 @@ public bool has_arguments_node(ast_mapping data) {
 public bool has_value_node(ast_mapping data) {
   return has_node(data, "value");
 }
+
+// === Visitor =================================================================
+
+public class AbstractVisitor {
+  public mixed visit(AbstractInstruction instruction);
+}
+
+public class AbstractInstruction {
+  protected ast_mapping _data;
+
+  protected void create(ast_mapping data) {
+    this::_data = data;
+  }
+
+  public ast_mapping `data() {
+    return this::_data;
+  }
+
+  public mixed accept(AbstractVisitor visitor);
+}
+
+public class Node {
+  inherit AbstractInstruction;
+
+  public mixed accept(AbstractVisitor visitor) {
+    return visitor->visit(this);
+  }
+}
+
+public class RemoveLocation {
+  inherit .AbstractVisitor;
+
+  public void visit(AbstractInstruction node) {
+    if (node->data) {
+      m_delete(node->data, "loc");
+
+      foreach (indices(node->data), string key) {
+        mixed v = node->data[key];
+
+        if (arrayp(v)) {
+          foreach (v, ast_mapping d) {
+            Node(d)->accept(this);
+          }
+        } else if (mappingp(v)) {
+          Node(v)->accept(this);
+        }
+      }
+    }
+  }
+}
+
+//! Removes the @tt{loc@} properties in all AST nodes.
+//! This is only useful for development/debug purposes when the AST is
+//! verbose and visually hard to parse.
+public ast_mapping remove_locations(ast_mapping data) {
+  RemoveLocation visitor = RemoveLocation();
+  Node root = Node(data);
+  root->accept(visitor);
+
+  return data;
+}
