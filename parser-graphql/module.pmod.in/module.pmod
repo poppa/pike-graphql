@@ -22,7 +22,7 @@
  */
 
 //! Module that converts GraphQL source code into a GraphQL AST as JSON
-//! This is a wrapper for @tt{libgraphql@}.
+//! This is a wrapper for @tt{libgraphqlparser@}.
 
 //! @ignore
 inherit Parser@module@ : parent;
