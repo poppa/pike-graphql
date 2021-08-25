@@ -1,0 +1,52 @@
+AC_INIT(graphqlparser.cmod)
+AC_ARG_WITH(
+  [graphqlparser],
+  [AS_HELP_STRING(
+    [--with(out)-graphqlparser],
+    [Support for GraphQLParser]
+  )],
+  [],
+  [with_graphqlparser=yes]
+)
+
+AC_MODULE_INIT()
+
+AC_CONFIG_HEADERS(config.h)
+
+PIKE_FEATURE_WITHOUT(GraphQLParser)
+
+have_libgraphqlparser="no"
+
+AS_IF(
+  [ test "x$with_graphqlparser" != "xno" ],
+  [
+	  PIKE_FEATURE_NODEP(GraphQLParser)
+
+    AC_CHECK_HEADER(
+      [graphqlparser/c/GraphQLParser.h],
+      [
+        # NB: When linking to the static library,
+        #     -lstdc++ and/or -lc++ must be listed explicitly.
+        AC_CHECK_LIB(stdc++, __dynamic_cast)
+        AC_CHECK_LIB(c++, _Znam)
+
+        CMOD_LIBS=" -lgraphqlparser"
+        CMOD_CFLAGS=""
+
+        AC_SUBST(CMOD_CFLAGS)
+        AC_SUBST(CMOD_LIBS)
+
+        PIKE_FEATURE_OK(GraphQLParser)
+
+        AC_DEFINE(
+          HAVE_LIBGRAPHQLPARSER,
+          [1],
+          [Define to 1 if you have libgraphqlparser.]
+        )
+        have_libgraphqlparser="yes"
+      ]
+    )
+  ]
+)
+
+AC_OUTPUT(Makefile, echo FOO >stamp-h)

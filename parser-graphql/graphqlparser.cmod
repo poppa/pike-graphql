@@ -1,0 +1,114 @@
+/* Parser.GraphQl
+ *
+ * Copyright (C) 2021  pontus
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+
+#include "global.h"
+#include "module.h"
+#include "interpret.h"
+#include "builtin_functions.h"
+#include "pike_types.h"
+#include "module_support.h"
+
+#include "config.h"
+
+DECLARATIONS
+
+#ifdef HAVE_LIBGRAPHQLPARSER
+
+#include <graphqlparser/c/GraphQLAst.h>
+#include <graphqlparser/c/GraphQLAstNode.h>
+#include <graphqlparser/c/GraphQLParser.h>
+#include <graphqlparser/c/GraphQLAstToJSON.h>
+
+PIKEFUN string to_json(string(8bit) gql_source)
+flags ID_PROTECTED;
+{
+	struct GraphQLAstNode *ast;
+	const char *error;
+	char *json;
+
+	ast = graphql_parse_string(gql_source->str, &error);
+
+	if (ast == NULL) {
+		// FIXME: Handle error.
+		//        We should "catch" here and propagate the error to the pmod
+		//        layer. See sass.cmod for example
+		Pike_error("Failed parsing GraphQL source: %s", (char *) error);
+		graphql_error_free(error);
+		push_undefined();
+		return;
+	}
+
+	json = (char *) graphql_ast_to_json(ast);
+
+	graphql_node_free(ast);
+
+	push_text(json);
+
+	return;
+}
+
+PIKEFUN string with_schema_support_to_json(string(8bit) gql_source)
+flags ID_PROTECTED;
+{
+	struct GraphQLAstNode *ast;
+	const char *error;
+	char *json;
+
+	ast = graphql_parse_string_with_experimental_schema_support(
+		gql_source->str, &error
+	);
+
+	if (ast == NULL) {
+		// FIXME: Handle error.
+		//        We should "catch" here and propagate the error to the pmod
+		//        layer. See sass.cmod for example
+		Pike_error("Failed parsing GraphQL source: %s", (char *) error);
+		graphql_error_free(error);
+		push_undefined();
+		return;
+	}
+
+	json = (char *) graphql_ast_to_json(ast);
+
+	graphql_node_free(ast);
+
+	push_text(json);
+
+	return;
+}
+
+PIKE_MODULE_INIT
+{
+	INIT
+}
+
+PIKE_MODULE_EXIT
+{
+	EXIT
+}
+
+#else /* HAVE_LIBGRAPHQLPARSER */
+
+PIKE_MODULE_INIT {
+  HIDE_MODULE();
+}
+PIKE_MODULE_EXIT {}
+
+#endif /* HAVE_LIBGRAPHQLPARSER */

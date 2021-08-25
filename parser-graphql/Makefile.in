@@ -1,0 +1,29 @@
+@make_variables@
+
+VPATH=@srcdir@
+MODNAME=GraphQL
+MODDIR=Parser.pmod/
+MODULE_PMOD_IN=$(SRCDIR)/module.pmod.in
+AUTODOC_SRC_IN=$(SRCDIR)/module.pmod.in/module.pmod $(SRCDIR)/graphqlparser.c
+MODULE_WRAPPER_PREFIX=_
+# This seems necessary when the module is a standalone module
+MODULE_INSTALL=graphqlparser.o
+MODULE_LDFLAGS=@LDFLAGS@ @LIBS@ @CMOD_LIBS@
+MODULE_CFLAGS=@CMOD_CFLAGS@
+OBJS=$(SRCDIR)/graphqlparser.o
+
+@dynamic_module_makefile@
+
+graphqlparser.o: $(SRCDIR)/graphqlparser.c
+
+@dependencies@
+
+LOCAL_GENERATED_FILES=configure config.cache config.h config.log \
+	config.status config.warnings config.h.in~ make_variables modlist_segment \
+	propagated_variables remake graphqlparser.o module.so Makefile \
+  dependencies linker_options graphqlparser.c testsuite \
+  pike_GraphQLParser.feature config.h.in stamp-h.in
+
+localdevclean: spotless
+	-rm -f $(LOCAL_GENERATED_FILES)
+	-rm -rf autom4te.cache plib refdoc module.pmod
