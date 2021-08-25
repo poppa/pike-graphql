@@ -39,69 +39,69 @@ DECLARATIONS
 PIKEFUN string to_json(string(8bit) gql_source)
 flags ID_PROTECTED;
 {
-	struct GraphQLAstNode *ast;
-	const char *error;
-	char *json;
+  struct GraphQLAstNode *ast;
+  const char *error;
+  char *json;
 
-	ast = graphql_parse_string(gql_source->str, &error);
+  ast = graphql_parse_string(gql_source->str, &error);
 
-	if (ast == NULL) {
-		// FIXME: Handle error.
-		//        We should "catch" here and propagate the error to the pmod
-		//        layer. See sass.cmod for example
-		Pike_error("Failed parsing GraphQL source: %s", (char *) error);
-		graphql_error_free(error);
-		push_undefined();
-		return;
-	}
+  if (ast == NULL) {
+    // FIXME: Handle error.
+    //        We should "catch" here and propagate the error to the pmod
+    //        layer. See sass.cmod for example
+    Pike_error("Failed parsing GraphQL source: %s", (char *) error);
+    graphql_error_free(error);
+    push_undefined();
+    return;
+  }
 
-	json = (char *) graphql_ast_to_json(ast);
+  json = (char *) graphql_ast_to_json(ast);
 
-	graphql_node_free(ast);
+  graphql_node_free(ast);
 
-	push_text(json);
+  push_text(json);
 
-	return;
+  return;
 }
 
 PIKEFUN string with_schema_support_to_json(string(8bit) gql_source)
 flags ID_PROTECTED;
 {
-	struct GraphQLAstNode *ast;
-	const char *error;
-	char *json;
+  struct GraphQLAstNode *ast;
+  const char *error;
+  char *json;
 
-	ast = graphql_parse_string_with_experimental_schema_support(
-		gql_source->str, &error
-	);
+  ast = graphql_parse_string_with_experimental_schema_support(
+    gql_source->str, &error
+  );
 
-	if (ast == NULL) {
-		// FIXME: Handle error.
-		//        We should "catch" here and propagate the error to the pmod
-		//        layer. See sass.cmod for example
-		Pike_error("Failed parsing GraphQL source: %s", (char *) error);
-		graphql_error_free(error);
-		push_undefined();
-		return;
-	}
+  if (ast == NULL) {
+    // FIXME: Handle error.
+    //        We should "catch" here and propagate the error to the pmod
+    //        layer. See sass.cmod for example
+    Pike_error("Failed parsing GraphQL source: %s", (char *) error);
+    graphql_error_free(error);
+    push_undefined();
+    return;
+  }
 
-	json = (char *) graphql_ast_to_json(ast);
+  json = (char *) graphql_ast_to_json(ast);
 
-	graphql_node_free(ast);
+  graphql_node_free(ast);
 
-	push_text(json);
+  push_text(json);
 
-	return;
+  return;
 }
 
 PIKE_MODULE_INIT
 {
-	INIT
+  INIT
 }
 
 PIKE_MODULE_EXIT
 {
-	EXIT
+  EXIT
 }
 
 #else /* HAVE_LIBGRAPHQLPARSER */
